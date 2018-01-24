@@ -1,5 +1,5 @@
 //
-//  DFZFBLayout.m
+//  MPGestureLayout.m
 //  collectionPanViewTest
 //
 //  Created by ytz on 2018/1/24.
@@ -9,18 +9,17 @@
 #import "MPGestureLayout.h"
 
 typedef NS_ENUM(NSInteger,GestureOperation) {
-    OptionNone = 0,
-    OptionChange,
-    OptionDelete,
+    OperationNone = 0,
+    OperationChange,
+    OperationDelete,
 };
 
 
 @interface MPGestureLayout ()<UIGestureRecognizerDelegate>
-
-@property (nonatomic, strong) UILongPressGestureRecognizer *longPress;
-@property (nonatomic, strong) NSIndexPath *currentIndexPath;
-@property (nonatomic, strong) UIView *mappingImageCell;
-@property (nonatomic, assign)GestureOperation operation;
+@property (nonatomic, strong) UILongPressGestureRecognizer * longPress;
+@property (nonatomic, strong) NSIndexPath * currentIndexPath;
+@property (nonatomic, strong) UIView * snapImageView;
+@property (nonatomic, assign) GestureOperation operation;
 
 @end
 
@@ -78,55 +77,57 @@ typedef NS_ENUM(NSInteger,GestureOperation) {
         {
             CGPoint location = [longPress locationInView:self.collectionView];
             NSIndexPath* indexPath = [self.collectionView indexPathForItemAtPoint:location];
-            if (!indexPath) return;
             
-            NSArray *disableArray =[self getDisableMoveArray];
+            if (!indexPath) return;
+            NSArray *disableArray =[self getDisableMoveArray];  //不可操作
             if([disableArray containsObject:indexPath]) return ;
+            if(_operation!=OperationNone) return;
+            
+            
 
             self.currentIndexPath = indexPath;
             UICollectionViewCell* targetCell = [self.collectionView cellForItemAtIndexPath:self.currentIndexPath];
         
             UIView* cellView = [targetCell snapshotViewAfterScreenUpdates:YES];
-            self.mappingImageCell = cellView;
-            
-
-            self.mappingImageCell.frame = cellView.frame;
+            self.snapImageView = cellView;
+            self.snapImageView.frame = cellView.frame;
             targetCell.hidden = YES;
             
-            [[UIApplication sharedApplication].keyWindow addSubview:self.mappingImageCell];
-            
+            [[UIApplication sharedApplication].keyWindow addSubview:self.snapImageView];
+            //转为窗体坐标
             CGPoint center = [self.collectionView convertPoint:targetCell.center toView:nil];
             cellView.transform = CGAffineTransformMakeScale(1.1, 1.1);
             cellView.center = center;
+            [self beginGesture];
         }
             break;
         case UIGestureRecognizerStateChanged:
         {
             CGPoint point = [longPress locationInView:[UIApplication sharedApplication].keyWindow];
             //更新cell的位置
-            self.mappingImageCell.center = point;
+            self.snapImageView.center = point;
             NSIndexPath * indexPath = [self.collectionView indexPathForItemAtPoint:point];
-            NSArray *disableArray =[self getDisableMoveArray];
             
-            if (!indexPath) {
+            if (!indexPath) {   //没滑到其他cell上
                  CGRect deleteRect = [self getDeleteArea];
-                if ( CGRectContainsPoint(deleteRect, point)) {
-                    _operation = OptionDelete;
+                if ( CGRectIntersectsRect(deleteRect, self.snapImageView.frame)) { //滑到删除区域
+                    _operation = OperationDelete;
                     [self moveInDeleteArea];
                 }
                 else {
-                    _operation = OptionNone;
+                    _operation = OperationNone;
                     [self leaveDeleteArea];
                   
                 }
                 return;
             }
             
+            NSArray *disableArray =[self getDisableMoveArray];
             if([disableArray containsObject:indexPath])return ;
             
-            if (![indexPath isEqual:self.currentIndexPath])
+            if (![indexPath isEqual:self.currentIndexPath])//滑到其他cell上
             {
-                 _operation = OptionChange;
+                 _operation = OperationChange;
                 if ([self.delegate respondsToSelector:@selector(mp_moveDataItem:toIndexPath:)]) {
                     [self.delegate mp_moveDataItem:self.currentIndexPath toIndexPath:indexPath];
                 }
@@ -137,38 +138,37 @@ typedef NS_ENUM(NSInteger,GestureOperation) {
             break;
         case UIGestureRecognizerStateEnded:
         {
-             if(_operation== OptionDelete) { //删除操作
+             if(_operation== OperationDelete) { //删除操作
                 if ([self.delegate respondsToSelector:@selector(mp_removeDataObjectAtIndex:)]) {
                     [self.collectionView performBatchUpdates:^{
                           [self.delegate mp_removeDataObjectAtIndex:_currentIndexPath];
                             [self.collectionView deleteItemsAtIndexPaths:@[_currentIndexPath]];
                     } completion:^(BOOL finished) {
                     }];
-                    [self.mappingImageCell removeFromSuperview];
-                    self.mappingImageCell = nil;
+                    [self.snapImageView removeFromSuperview];
+                    self.snapImageView = nil;
                     self.currentIndexPath = nil;
                 }
              } else {   //移动操作
                  UICollectionViewCell *cell = [self.collectionView cellForItemAtIndexPath:self.currentIndexPath];
+                 CGPoint center = [self.collectionView convertPoint:cell.center toView:nil];
                  [UIView animateWithDuration:0.25 animations:^{
-                     self.mappingImageCell.center = cell.center;
+                     self.snapImageView.center = center;
                  } completion:^(BOOL finished) {
-                     [self.mappingImageCell removeFromSuperview];
+                     [self.snapImageView removeFromSuperview];
                      cell.hidden           = NO;
-                     self.mappingImageCell = nil;
+                     self.snapImageView = nil;
                      self.currentIndexPath = nil;
                  }];
-                 _operation= OptionNone;
-                [self leaveDeleteArea];
-             }
             
+             }
+            _operation= OperationNone;
+            [self leaveDeleteArea];
+            [self endGesture];
         }
             break;
         default:
-        {
-            
-        }
-            break;
+        break;
     }
 }
 
@@ -198,6 +198,19 @@ typedef NS_ENUM(NSInteger,GestureOperation) {
         return [self.delegate mp_didMoveToDeleteArea];
     }
 }
+
+- (void)beginGesture {
+    if([self.delegate respondsToSelector:@selector(mp_willBeginGesture)]) {
+        return [self.delegate mp_willBeginGesture];
+    }
+}
+
+- (void)endGesture {
+    if([self.delegate respondsToSelector:@selector(mp_didEndGesture)]) {
+        return [self.delegate mp_didEndGesture];
+    }
+}
+
 
 @end
 

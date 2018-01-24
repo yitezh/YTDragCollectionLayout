@@ -15,6 +15,7 @@
 		1E67E8FF20182F1700ACC649 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E67E8FE20182F1700ACC649 /* main.m */; };
 		1E67E90920182F1700ACC649 /* collectionPanViewTestTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E67E90820182F1700ACC649 /* collectionPanViewTestTests.m */; };
 		1E67E91420182F1700ACC649 /* collectionPanViewTestUITests.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E67E91320182F1700ACC649 /* collectionPanViewTestUITests.m */; };
+		1E67E92320182F7000ACC649 /* MPGestureLayout.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E67E92220182F7000ACC649 /* MPGestureLayout.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -51,6 +52,8 @@
 		1E67E90F20182F1700ACC649 /* collectionPanViewTestUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = collectionPanViewTestUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		1E67E91320182F1700ACC649 /* collectionPanViewTestUITests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = collectionPanViewTestUITests.m; sourceTree = "<group>"; };
 		1E67E91520182F1700ACC649 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		1E67E92120182F7000ACC649 /* MPGestureLayout.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MPGestureLayout.h; sourceTree = "<group>"; };
+		1E67E92220182F7000ACC649 /* MPGestureLayout.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MPGestureLayout.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -81,6 +84,8 @@
 		1E67E8E320182F1700ACC649 = {
 			isa = PBXGroup;
 			children = (
+				1E67E92120182F7000ACC649 /* MPGestureLayout.h */,
+				1E67E92220182F7000ACC649 /* MPGestureLayout.m */,
 				1E67E8EE20182F1700ACC649 /* collectionPanViewTest */,
 				1E67E90720182F1700ACC649 /* collectionPanViewTestTests */,
 				1E67E91220182F1700ACC649 /* collectionPanViewTestUITests */,
@@ -267,6 +272,7 @@
 			files = (
 				1E67E8F420182F1700ACC649 /* ViewController.m in Sources */,
 				1E67E8FF20182F1700ACC649 /* main.m in Sources */,
+				1E67E92320182F7000ACC649 /* MPGestureLayout.m in Sources */,
 				1E67E8F120182F1700ACC649 /* AppDelegate.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -370,7 +376,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 11.2;
+				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				MTL_ENABLE_DEBUG_INFO = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = iphoneos;
@@ -419,7 +425,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 11.2;
+				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				SDKROOT = iphoneos;
 				VALIDATE_PRODUCT = YES;
@@ -431,6 +437,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = RESWVZ85JX;
 				INFOPLIST_FILE = collectionPanViewTest/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.yiz.collectionPanViewTest;
@@ -444,6 +451,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = RESWVZ85JX;
 				INFOPLIST_FILE = collectionPanViewTest/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.yiz.collectionPanViewTest;
