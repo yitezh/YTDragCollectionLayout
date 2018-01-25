@@ -26,6 +26,8 @@
 - (void)mp_didEndGesture;
 //不可移动的item集合
 - (NSArray<NSIndexPath *> *)mp_disableMoveItemArray;
+//collectionView的所在视图  //不实现则默认为window
+- (UIView *)mp_moveMainView;
 @end
 
 @interface MPGestureLayout : UICollectionViewFlowLayout

@@ -72,9 +72,11 @@ typedef NS_ENUM(NSInteger,GestureOperation) {
 
 - (void)handleLongPress:(UILongPressGestureRecognizer*)longPress
 {
+    UIView *touchView = [self getMoveMainView];
     switch (longPress.state) {
         case UIGestureRecognizerStateBegan:
         {
+           
             CGPoint location = [longPress locationInView:self.collectionView];
             NSIndexPath* indexPath = [self.collectionView indexPathForItemAtPoint:location];
             
@@ -93,9 +95,9 @@ typedef NS_ENUM(NSInteger,GestureOperation) {
             self.snapImageView.frame = cellView.frame;
             targetCell.hidden = YES;
             
-            [[UIApplication sharedApplication].keyWindow addSubview:self.snapImageView];
+            [touchView addSubview:self.snapImageView];
             //转为窗体坐标
-            CGPoint center = [self.collectionView convertPoint:targetCell.center toView:nil];
+            CGPoint center = [self.collectionView convertPoint:targetCell.center toView:touchView];
             cellView.transform = CGAffineTransformMakeScale(1.1, 1.1);
             cellView.center = center;
             [self beginGesture];
@@ -103,9 +105,12 @@ typedef NS_ENUM(NSInteger,GestureOperation) {
             break;
         case UIGestureRecognizerStateChanged:
         {
-            CGPoint point = [longPress locationInView:[UIApplication sharedApplication].keyWindow];
+            if(!self.snapImageView) return;
+            CGPoint point = [longPress locationInView:self.collectionView];
             //更新cell的位置
-            self.snapImageView.center = point;
+            CGPoint center = [longPress locationInView:touchView];
+            
+            self.snapImageView.center = center;
             NSIndexPath * indexPath = [self.collectionView indexPathForItemAtPoint:point];
             
             if (!indexPath) {   //没滑到其他cell上
@@ -117,7 +122,6 @@ typedef NS_ENUM(NSInteger,GestureOperation) {
                 else {
                     _operation = OperationNone;
                     [self leaveDeleteArea];
-                  
                 }
                 return;
             }
@@ -125,9 +129,9 @@ typedef NS_ENUM(NSInteger,GestureOperation) {
             NSArray *disableArray =[self getDisableMoveArray];
             if([disableArray containsObject:indexPath])return ;
             
-            if (![indexPath isEqual:self.currentIndexPath])//滑到其他cell上
+            if (![indexPath isEqual:self.currentIndexPath]&&indexPath)//滑到其他cell上
             {
-                 _operation = OperationChange;
+                _operation = OperationChange;
                 if ([self.delegate respondsToSelector:@selector(mp_moveDataItem:toIndexPath:)]) {
                     [self.delegate mp_moveDataItem:self.currentIndexPath toIndexPath:indexPath];
                 }
@@ -138,38 +142,47 @@ typedef NS_ENUM(NSInteger,GestureOperation) {
             break;
         case UIGestureRecognizerStateEnded:
         {
+   
              if(_operation== OperationDelete) { //删除操作
                 if ([self.delegate respondsToSelector:@selector(mp_removeDataObjectAtIndex:)]) {
                     [self.collectionView performBatchUpdates:^{
-                          [self.delegate mp_removeDataObjectAtIndex:_currentIndexPath];
+                        [self.delegate mp_removeDataObjectAtIndex:_currentIndexPath];
                             [self.collectionView deleteItemsAtIndexPaths:@[_currentIndexPath]];
+                        [self.snapImageView removeFromSuperview];
+                      
+                        
                     } completion:^(BOOL finished) {
+                        [self resetData];
                     }];
-                    [self.snapImageView removeFromSuperview];
-                    self.snapImageView = nil;
-                    self.currentIndexPath = nil;
+           
                 }
-             } else {   //移动操作
+             } else  {   //移动操作
                  UICollectionViewCell *cell = [self.collectionView cellForItemAtIndexPath:self.currentIndexPath];
-                 CGPoint center = [self.collectionView convertPoint:cell.center toView:nil];
+                 CGPoint center = [self.collectionView convertPoint:cell.center toView:touchView];
                  [UIView animateWithDuration:0.25 animations:^{
                      self.snapImageView.center = center;
                  } completion:^(BOOL finished) {
+                     
                      [self.snapImageView removeFromSuperview];
                      cell.hidden           = NO;
-                     self.snapImageView = nil;
-                     self.currentIndexPath = nil;
+                     [self resetData];
                  }];
             
              }
-            _operation= OperationNone;
-            [self leaveDeleteArea];
-            [self endGesture];
+       
         }
             break;
         default:
         break;
     }
+}
+
+- (void)resetData {
+    self.snapImageView = nil;
+    self.currentIndexPath = nil;
+    _operation= OperationNone;
+    [self leaveDeleteArea];
+    [self endGesture];
 }
 
 - (CGRect )getDeleteArea {
@@ -210,6 +223,17 @@ typedef NS_ENUM(NSInteger,GestureOperation) {
         return [self.delegate mp_didEndGesture];
     }
 }
+
+- (UIView *)getMoveMainView {
+    if([self.delegate respondsToSelector:@selector(mp_moveMainView)]) {
+        return [self.delegate mp_moveMainView];
+    }
+    return [UIApplication sharedApplication].keyWindow;
+    
+    
+}
+
+
 
 
 @end
