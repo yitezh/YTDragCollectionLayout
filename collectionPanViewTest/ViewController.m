@@ -7,8 +7,8 @@
 //
 
 #import "ViewController.h"
-#import "MPGestureLayout.h"
-@interface ViewController ()<MPGestureLayout,UICollectionViewDelegate,UICollectionViewDataSource>
+#import "YTDragCollectionLayout.h"
+@interface ViewController ()<YTDragCollectionLayoutDelegate,UICollectionViewDelegate,UICollectionViewDataSource>
 @property (strong, nonatomic) UICollectionView *collectionView;
 @property (strong, nonatomic) NSMutableArray *dataArray;
 @property (strong, nonatomic) UIView *deleteView;
@@ -28,7 +28,7 @@
     self.edgesForExtendedLayout = UIRectEdgeNone;
     self.view.frame =CGRectMake(0, 64, YScreenWidth, YScreenHeight-64);
     
-    MPGestureLayout *collectionViewLayout = [[MPGestureLayout alloc] init];
+    YTDragCollectionLayout *collectionViewLayout = [[YTDragCollectionLayout alloc] init];
     collectionViewLayout.minimumInteritemSpacing = 15;
     collectionViewLayout.minimumLineSpacing = 5;
     collectionViewLayout.itemSize = CGSizeMake(50, 54);
@@ -88,11 +88,11 @@
 
 }
 //不可移动的items集合（可选实现）
-- (NSArray<NSIndexPath *> *)mp_disableMoveItemArray {
-    NSIndexPath *indexPath = [NSIndexPath indexPathForRow:self.dataArray.count-1 inSection:0];
-    return @[indexPath];
-    
-}
+//- (NSArray<NSIndexPath *> *)mp_disableMoveItemArray {
+//    NSIndexPath *indexPath = [NSIndexPath indexPathForRow:self.dataArray.count-1 inSection:0];
+//    return @[indexPath];
+//    
+//}
 
 - (void)mp_didMoveToDeleteArea {
     self.deleteView.alpha = .5;

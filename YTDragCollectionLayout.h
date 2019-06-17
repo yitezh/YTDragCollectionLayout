@@ -1,5 +1,5 @@
 //
-//  MPGestureLayout.h
+//  YTDragCollectionLayout.h
 //  collectionPanViewTest
 //
 //  Created by ytz on 2018/1/24.
@@ -9,7 +9,7 @@
 #import <UIKit/UIKit.h>
 #define YScreenWidth    [UIScreen mainScreen].bounds.size.width
 #define YScreenHeight   [UIScreen mainScreen].bounds.size.height
-@protocol MPGestureLayout <NSObject>
+@protocol YTDragCollectionLayoutDelegate <NSObject>
 
 //移动数据源
 - (void)mp_moveDataItem:(NSIndexPath*)fromIndexPath toIndexPath:(NSIndexPath*)toIndexPath;
@@ -30,9 +30,9 @@
 - (UIView *)mp_moveMainView;
 @end
 
-@interface MPGestureLayout : UICollectionViewFlowLayout
+@interface YTDragCollectionLayout : UICollectionViewFlowLayout
 
-@property (nonatomic, assign) id<MPGestureLayout> delegate;
+@property (nonatomic, assign) id<YTDragCollectionLayoutDelegate> delegate;
 
 @end
 

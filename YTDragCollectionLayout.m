@@ -1,12 +1,12 @@
 //
-//  MPGestureLayout.m
+//  YTDragCollectionLayout.m
 //  collectionPanViewTest
 //
 //  Created by ytz on 2018/1/24.
 //  Copyright © 2018年 ytz. All rights reserved.
 //
 
-#import "MPGestureLayout.h"
+#import "YTDragCollectionLayout.h"
 
 typedef NS_ENUM(NSInteger,GestureOperation) {
     OperationNone = 0,
@@ -15,7 +15,7 @@ typedef NS_ENUM(NSInteger,GestureOperation) {
 };
 
 
-@interface MPGestureLayout ()<UIGestureRecognizerDelegate>
+@interface YTDragCollectionLayout ()<YTDragCollectionLayoutDelegate>
 @property (nonatomic, strong) UILongPressGestureRecognizer * longPress;
 @property (nonatomic, strong) NSIndexPath * currentIndexPath;
 @property (nonatomic, strong) UIView * snapImageView;
@@ -23,7 +23,7 @@ typedef NS_ENUM(NSInteger,GestureOperation) {
 
 @end
 
-@implementation MPGestureLayout
+@implementation YTDragCollectionLayout
 
 - (id)initWithCoder:(NSCoder *)aDecoder{
     self = [super initWithCoder:aDecoder];
