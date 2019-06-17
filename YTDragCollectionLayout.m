@@ -15,7 +15,7 @@ typedef NS_ENUM(NSInteger,GestureOperation) {
 };
 
 
-@interface YTDragCollectionLayout ()<YTDragCollectionLayoutDelegate>
+@interface YTDragCollectionLayout ()<UIGestureRecognizerDelegate>
 @property (nonatomic, strong) UILongPressGestureRecognizer * longPress;
 @property (nonatomic, strong) NSIndexPath * currentIndexPath;
 @property (nonatomic, strong) UIView * snapImageView;
