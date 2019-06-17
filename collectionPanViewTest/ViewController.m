@@ -87,7 +87,7 @@
     return  CGRectMake(0, self.view.frame.size.height-50, YScreenWidth, 50);
 
 }
-
+//不可移动的items集合（可选实现）
 - (NSArray<NSIndexPath *> *)mp_disableMoveItemArray {
     NSIndexPath *indexPath = [NSIndexPath indexPathForRow:self.dataArray.count-1 inSection:0];
     return @[indexPath];
