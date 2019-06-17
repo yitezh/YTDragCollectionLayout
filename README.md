@@ -1,1 +1,1 @@
-# collectionCell长按排序和拖动删除
+# CollectionView拖动排序和删除
