@@ -9,17 +9,19 @@
 #import "YTDragCollectionLayout.h"
 
 typedef NS_ENUM(NSInteger,GestureOperation) {
-    OperationNone = 0,
-    OperationChange,
-    OperationDelete,
+    GestureOperationNone = 0,
+    GestureOperationChange,
+    GestureOperationDelete,
 };
 
 
-@interface YTDragCollectionLayout ()<UIGestureRecognizerDelegate>
+@interface YTDragCollectionLayout ()<UIGestureRecognizerDelegate> {
+    GestureOperation operation;
+}
+
 @property (nonatomic, strong) UILongPressGestureRecognizer * longPress;
 @property (nonatomic, strong) NSIndexPath * currentIndexPath;
 @property (nonatomic, strong) UIView * snapImageView;
-@property (nonatomic, assign) GestureOperation operation;
 
 @end
 
@@ -73,23 +75,20 @@ typedef NS_ENUM(NSInteger,GestureOperation) {
 - (void)handleLongPress:(UILongPressGestureRecognizer*)longPress
 {
     UIView *touchView = [self getMoveMainView];
+ 
     switch (longPress.state) {
         case UIGestureRecognizerStateBegan:
         {
-           
             CGPoint location = [longPress locationInView:self.collectionView];
             NSIndexPath* indexPath = [self.collectionView indexPathForItemAtPoint:location];
+            BOOL canMove = [self canMoveItemInIndexPath:indexPath];
             
-            if (!indexPath) return;
-            NSArray *disableArray =[self getDisableMoveArray];  //不可操作
-            if([disableArray containsObject:indexPath]) return ;
-            if(_operation!=OperationNone) return;
+            if(!indexPath||!canMove||operation!=GestureOperationNone) {
+                return ;
+            }
             
-            
-
             self.currentIndexPath = indexPath;
             UICollectionViewCell* targetCell = [self.collectionView cellForItemAtIndexPath:self.currentIndexPath];
-        
             UIView* cellView = [targetCell snapshotViewAfterScreenUpdates:YES];
             self.snapImageView = cellView;
             self.snapImageView.frame = cellView.frame;
@@ -106,127 +105,143 @@ typedef NS_ENUM(NSInteger,GestureOperation) {
         case UIGestureRecognizerStateChanged:
         {
             if(!self.snapImageView) return;
-            CGPoint point = [longPress locationInView:self.collectionView];
-            //更新cell的位置
-            CGPoint center = [longPress locationInView:touchView];
             
+            CGPoint point = [longPress locationInView:self.collectionView];
+            CGPoint center = [longPress locationInView:touchView];
             self.snapImageView.center = center;
             NSIndexPath * indexPath = [self.collectionView indexPathForItemAtPoint:point];
             
             if (!indexPath) {   //没滑到其他cell上
-                 CGRect deleteRect = [self getDeleteArea];
+                CGRect deleteRect = [self getDeleteArea];
                 if ( CGRectIntersectsRect(deleteRect, self.snapImageView.frame)) { //滑到删除区域
-                    _operation = OperationDelete;
+                    operation = GestureOperationDelete;
                     [self moveInDeleteArea];
                 }
                 else {
-                    _operation = OperationNone;
+                    operation = GestureOperationNone;
                     [self leaveDeleteArea];
                 }
                 return;
             }
             
-            NSArray *disableArray =[self getDisableMoveArray];
-            if([disableArray containsObject:indexPath])return ;
+            BOOL canMove = [self canMoveItemInIndexPath:indexPath];
+            if(!canMove) {
+                return ;
+            }
             
             if (![indexPath isEqual:self.currentIndexPath]&&indexPath)//滑到其他cell上
             {
-                _operation = OperationChange;
-                if ([self.delegate respondsToSelector:@selector(mp_moveDataItem:toIndexPath:)]) {
-                    [self.delegate mp_moveDataItem:self.currentIndexPath toIndexPath:indexPath];
-                }
+                operation = GestureOperationChange;
+                
+                [self.collectionView performBatchUpdates:^{
+                [self moveDataFromIndex:self.currentIndexPath toIndexPath:indexPath];
                 [self.collectionView moveItemAtIndexPath:self.currentIndexPath toIndexPath:indexPath];
+                } completion:^(BOOL finished) {
+                    
+                }];
                 self.currentIndexPath = indexPath;
             }
         }
-            break;
+        break;
         case UIGestureRecognizerStateEnded:
         {
-   
-             if(_operation== OperationDelete) { //删除操作
-                if ([self.delegate respondsToSelector:@selector(mp_removeDataObjectAtIndex:)]) {
+            
+            if(operation== GestureOperationDelete) { //删除操作
+                
+                if ([self.delegate respondsToSelector:@selector(yt_removeDataObjectAtIndex:)]) {
+                    
                     [self.collectionView performBatchUpdates:^{
-                        [self.delegate mp_removeDataObjectAtIndex:_currentIndexPath];
-                            [self.collectionView deleteItemsAtIndexPaths:@[_currentIndexPath]];
+                        [self.delegate yt_removeDataObjectAtIndex:_currentIndexPath];
+                        [self.collectionView deleteItemsAtIndexPaths:@[_currentIndexPath]];
                         [self.snapImageView removeFromSuperview];
-                      
-                        
                     } completion:^(BOOL finished) {
                         [self resetData];
                     }];
-           
+                    
                 }
-             } else  {   //移动操作
-                 UICollectionViewCell *cell = [self.collectionView cellForItemAtIndexPath:self.currentIndexPath];
-                 CGPoint center = [self.collectionView convertPoint:cell.center toView:touchView];
-                 [UIView animateWithDuration:0.25 animations:^{
-                     self.snapImageView.center = center;
-                 } completion:^(BOOL finished) {
-                     
-                     [self.snapImageView removeFromSuperview];
-                     cell.hidden           = NO;
-                     [self resetData];
-                 }];
+            } else  {   //移动操作
+                
+                UICollectionViewCell *cell = [self.collectionView cellForItemAtIndexPath:self.currentIndexPath];
+                CGPoint center = [self.collectionView convertPoint:cell.center toView:touchView];
+                [UIView animateWithDuration:0.25 animations:^{
+                    self.snapImageView.center = center;
+                } completion:^(BOOL finished) {
+                    [self.snapImageView removeFromSuperview];
+                    cell.hidden  = NO;
+                    [self resetData];
+                    
+                }];
+            }
             
-             }
-       
         }
             break;
         default:
-        break;
+            break;
     }
 }
 
 - (void)resetData {
+    operation= GestureOperationNone;
     self.snapImageView = nil;
     self.currentIndexPath = nil;
-    _operation= OperationNone;
     [self leaveDeleteArea];
     [self endGesture];
+    
+    //可以reload查看数据源是否正确
+    [self.collectionView reloadData];
+}
+
+- (void)moveDataFromIndex:(NSIndexPath *)fromIndex toIndexPath:(NSIndexPath *)indexPath {
+    if ([self.delegate respondsToSelector:@selector(yt_moveDataItem:toIndexPath:)]) {
+        [self.delegate yt_moveDataItem:fromIndex toIndexPath:indexPath];
+    }
+}
+
+- (BOOL)canMoveItemInIndexPath:(NSIndexPath *)indexPath {
+    BOOL canMove = YES;
+    if([self.delegate respondsToSelector:@selector(yt_canMoveItemInIndexPath:)]) {
+     canMove =  [self.delegate yt_canMoveItemInIndexPath:indexPath];
+    }
+    return canMove;
 }
 
 - (CGRect )getDeleteArea {
-    if([self.delegate respondsToSelector:@selector(mp_RectForDelete)]) {
-        return [self.delegate mp_RectForDelete];
+    if([self.delegate respondsToSelector:@selector(yt_RectForDelete)]) {
+        return [self.delegate yt_RectForDelete];
     }
     
     return CGRectZero;
 }
 
-- (NSArray<NSIndexPath *> *)getDisableMoveArray {
-    if([self.delegate respondsToSelector:@selector(mp_disableMoveItemArray)]) {
-        return [self.delegate mp_disableMoveItemArray];
-    }
-    return nil;
-}
+
 
 - (void)leaveDeleteArea {
-    if([self.delegate respondsToSelector:@selector(mp_didLeaveToDeleteArea)]) {
-        return [self.delegate mp_didLeaveToDeleteArea];
+    if([self.delegate respondsToSelector:@selector(yt_didLeaveToDeleteArea)]) {
+        return [self.delegate yt_didLeaveToDeleteArea];
     }
 }
 
 - (void)moveInDeleteArea {
-    if([self.delegate respondsToSelector:@selector(mp_didMoveToDeleteArea)]) {
-        return [self.delegate mp_didMoveToDeleteArea];
+    if([self.delegate respondsToSelector:@selector(yt_didMoveToDeleteArea)]) {
+        return [self.delegate yt_didMoveToDeleteArea];
     }
 }
 
 - (void)beginGesture {
-    if([self.delegate respondsToSelector:@selector(mp_willBeginGesture)]) {
-        return [self.delegate mp_willBeginGesture];
+    if([self.delegate respondsToSelector:@selector(yt_willBeginGesture)]) {
+        return [self.delegate yt_willBeginGesture];
     }
 }
 
 - (void)endGesture {
-    if([self.delegate respondsToSelector:@selector(mp_didEndGesture)]) {
-        return [self.delegate mp_didEndGesture];
+    if([self.delegate respondsToSelector:@selector(yt_didEndGesture)]) {
+        return [self.delegate yt_didEndGesture];
     }
 }
 
 - (UIView *)getMoveMainView {
-    if([self.delegate respondsToSelector:@selector(mp_moveMainView)]) {
-        return [self.delegate mp_moveMainView];
+    if([self.delegate respondsToSelector:@selector(yt_moveMainView)]) {
+        return [self.delegate yt_moveMainView];
     }
     return [UIApplication sharedApplication].keyWindow;
     

@@ -72,52 +72,55 @@
     return cell;
 }
 
-- (void)mp_moveDataItem:(NSIndexPath *)fromIndexPath toIndexPath:(NSIndexPath *)toIndexPath {
-    [self.dataArray exchangeObjectAtIndex:fromIndexPath.row withObjectAtIndex:toIndexPath.row];
+- (void)yt_moveDataItem:(NSIndexPath *)fromIndexPath toIndexPath:(NSIndexPath *)toIndexPath {
     
+    id  object = self.dataArray[fromIndexPath.row];
+    [self.dataArray removeObjectAtIndex:fromIndexPath.row];
+    [self.dataArray insertObject:object atIndex:toIndexPath.row];
+
+ //  [self.dataArray exchangeObjectAtIndex:fromIndexPath.row withObjectAtIndex:toIndexPath.row];
 }
 
-- (void)mp_removeDataObjectAtIndex:(NSIndexPath *)index {
-
+- (void)yt_removeDataObjectAtIndex:(NSIndexPath *)index {
       [self.dataArray removeObjectAtIndex:index.row];
 }
 
-- (CGRect)mp_RectForDelete {
+- (CGRect)yt_RectForDelete {
 
     return  CGRectMake(0, self.view.frame.size.height-50, YScreenWidth, 50);
 
 }
-//不可移动的items集合（可选实现）
-//- (NSArray<NSIndexPath *> *)mp_disableMoveItemArray {
-//    NSIndexPath *indexPath = [NSIndexPath indexPathForRow:self.dataArray.count-1 inSection:0];
-//    return @[indexPath];
-//    
-//}
 
-- (void)mp_didMoveToDeleteArea {
+- (BOOL)yt_canMoveItemInIndexPath:(NSIndexPath *)indexPath {
+
+    return YES;
+    
+}
+
+- (void)yt_didMoveToDeleteArea {
     self.deleteView.alpha = .5;
     [self.view bringSubviewToFront:self.deleteView];
 }
 
-- (void)mp_didLeaveToDeleteArea {
+- (void)yt_didLeaveToDeleteArea {
      self.deleteView.alpha = 1;
     
 }
 
-- (void)mp_willBeginGesture {
+- (void)yt_willBeginGesture {
     [UIView animateWithDuration:0.4 animations:^{
         self.deleteView.frame = CGRectMake(self.deleteView.frame.origin.x, self.view.frame.size.height-self.deleteView.frame.size.height, self.deleteView.frame.size.width, self.deleteView.frame.size.height);
     }];
     
 }
 
-- (void)mp_didEndGesture {
+- (void)yt_didEndGesture {
     [UIView animateWithDuration:0.4 animations:^{
          self.deleteView.frame = CGRectMake(self.deleteView.frame.origin.x, self.view.frame.size.height, self.deleteView.frame.size.width, self.deleteView.frame.size.height);
     }];
 }
 
-- (UIView *)mp_moveMainView{
+- (UIView *)yt_moveMainView{
     return self.view;
 }
 
