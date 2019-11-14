@@ -36,7 +36,7 @@
 
 @interface YTDragCollectionLayout : UICollectionViewFlowLayout
 
-@property (nonatomic, assign) id<YTDragCollectionLayoutDelegate> delegate;
+@property (nonatomic, weak) id<YTDragCollectionLayoutDelegate> delegate;
 
 @end
 

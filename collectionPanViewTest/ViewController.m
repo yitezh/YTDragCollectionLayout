@@ -18,37 +18,37 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-    self.dataArray = @[@"1",@"2",@"3",@"4",@"5",@"6",@"7",@"8",@"9",@"10",@"11",@"12",@"13",@"14",@"15",@"16",@"17",@"18",@"19",@"20",@"21",@"22",@"23"].mutableCopy;
-    if (@available(iOS 11, *)) {
-        [UIScrollView appearance].contentInsetAdjustmentBehavior = UIScrollViewContentInsetAdjustmentNever;
-    }else{
-        self.automaticallyAdjustsScrollViewInsets = NO;
-    }
-    
-    self.edgesForExtendedLayout = UIRectEdgeNone;
-    self.view.frame =CGRectMake(0, 64, YScreenWidth, YScreenHeight-64);
-    
-    YTDragCollectionLayout *collectionViewLayout = [[YTDragCollectionLayout alloc] init];
-    collectionViewLayout.minimumInteritemSpacing = 15;
-    collectionViewLayout.minimumLineSpacing = 5;
-    collectionViewLayout.itemSize = CGSizeMake(50, 54);
-    collectionViewLayout.delegate = self;
-    
-    _collectionView = [[UICollectionView alloc] initWithFrame:CGRectMake(0, 50, self.view.frame.size.width, self.view.frame.size.height) collectionViewLayout:collectionViewLayout];
-    _collectionView.delegate = self;
-    _collectionView.dataSource = self;
-
-    _collectionView.backgroundColor = [UIColor whiteColor];
-    [_collectionView registerClass:[UICollectionViewCell class] forCellWithReuseIdentifier:@"cell"];
-    [self.view addSubview:_collectionView];
-    
-    CGRect deleteRect = CGRectMake(0, self.view.frame.size.height, YScreenWidth, 50);
-    UIView *view  = [[UIView alloc] initWithFrame:deleteRect];
-    view.backgroundColor = [UIColor redColor];
-    
-    self.deleteView = view;
-    [self.view addSubview:view];
-    
+//    self.dataArray = @[@"1",@"2",@"3",@"4",@"5",@"6",@"7",@"8",@"9",@"10",@"11",@"12",@"13",@"14",@"15",@"16",@"17",@"18",@"19",@"20",@"21",@"22",@"23"].mutableCopy;
+//    if (@available(iOS 11, *)) {
+//        [UIScrollView appearance].contentInsetAdjustmentBehavior = UIScrollViewContentInsetAdjustmentNever;
+//    }else{
+//        self.automaticallyAdjustsScrollViewInsets = NO;
+//    }
+//
+//    self.edgesForExtendedLayout = UIRectEdgeNone;
+//    self.view.frame =CGRectMake(0, 64, YScreenWidth, YScreenHeight-64);
+//
+//    YTDragCollectionLayout *collectionViewLayout = [[YTDragCollectionLayout alloc] init];
+//    collectionViewLayout.minimumInteritemSpacing = 15;
+//    collectionViewLayout.minimumLineSpacing = 5;
+//    collectionViewLayout.itemSize = CGSizeMake(50, 54);
+//    collectionViewLayout.delegate = self;
+//
+//    _collectionView = [[UICollectionView alloc] initWithFrame:CGRectMake(0, 50, self.view.frame.size.width, self.view.frame.size.height) collectionViewLayout:collectionViewLayout];
+//    _collectionView.delegate = self;
+//    _collectionView.dataSource = self;
+//
+//    _collectionView.backgroundColor = [UIColor whiteColor];
+//    [_collectionView registerClass:[UICollectionViewCell class] forCellWithReuseIdentifier:@"cell"];
+//    [self.view addSubview:_collectionView];
+//
+//    CGRect deleteRect = CGRectMake(0, self.view.frame.size.height, YScreenWidth, 50);
+//    UIView *view  = [[UIView alloc] initWithFrame:deleteRect];
+//    view.backgroundColor = [UIColor redColor];
+//
+//    self.deleteView = view;
+//    [self.view addSubview:view];
+    self.dataArray = @[].mutableCopy;
     // Do any additional setup after loading the view, typically from a nib.
 }
 
